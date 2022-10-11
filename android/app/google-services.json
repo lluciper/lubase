@@ -1,0 +1,46 @@
+{
+  "project_info": {
+    "project_number": "1050644401027",
+    "project_id": "lubase-c57c5",
+    "storage_bucket": "lubase-c57c5.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:1050644401027:android:47dd71fa5542b10ab4c4b6",
+        "android_client_info": {
+          "package_name": "com.example.name"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "1050644401027-v96piapt8o0n60tumhpgbktb5mp625bl.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCu-DFz9OSbvDtAgFP2BtNcn82SfC6lal0"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "1050644401027-v96piapt8o0n60tumhpgbktb5mp625bl.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "1050644401027-c3pev0nr2r3ngcmuil9d1sdretq48j1a.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.example.name"
+              }
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
