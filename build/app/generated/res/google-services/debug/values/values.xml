@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="default_web_client_id" translatable="false">1050644401027-v96piapt8o0n60tumhpgbktb5mp625bl.apps.googleusercontent.com</string>
+    <string name="gcm_defaultSenderId" translatable="false">1050644401027</string>
+    <string name="google_api_key" translatable="false">AIzaSyCu-DFz9OSbvDtAgFP2BtNcn82SfC6lal0</string>
+    <string name="google_app_id" translatable="false">1:1050644401027:android:47dd71fa5542b10ab4c4b6</string>
+    <string name="google_crash_reporting_api_key" translatable="false">AIzaSyCu-DFz9OSbvDtAgFP2BtNcn82SfC6lal0</string>
+    <string name="google_storage_bucket" translatable="false">lubase-c57c5.appspot.com</string>
+    <string name="project_id" translatable="false">lubase-c57c5</string>
+</resources>
