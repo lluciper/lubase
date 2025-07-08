@@ -1,7 +1,7 @@
-import 'package:flutter/material.dart';
 import 'package:auto_route/auto_route.dart';
 import 'package:injectable/injectable.dart';
 import 'package:lubase/modules/home/navigate/home_route.dart';
+import 'package:lubase/modules/home/presenter/splash_screen/splash_screen.dart';
 
 import '../../../modules/home/presenter/home_screen/home_screen.dart';
 
@@ -15,6 +15,7 @@ class AppRouter extends RootStackRouter {
 
   @override
   List<AutoRoute> get routes => [
+        AutoRoute(page: SplashRoute.page, initial: true),
         ...HomePageRouter.routes,
       ];
 }

@@ -3,11 +3,13 @@ import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:get_it/get_it.dart';
 import 'package:lubase/app/index.dart';
 
+import 'initialized/di/di.dart';
 import 'resources/generated/l10n.dart';
 import 'resources/l10n/language.dart';
 
-void main() {
+void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  await configureInjection();
   runApp(const MyApp());
 }
 
