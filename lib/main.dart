@@ -1,96 +1,27 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_localizations/flutter_localizations.dart';
-import 'package:get_it/get_it.dart';
-import 'package:lubase/app/index.dart';
 
-import 'initialized/di/di.dart';
-import 'resources/generated/l10n.dart';
-import 'resources/l10n/language.dart';
+import 'app.dart';
+import 'app_router.dart';
+import 'core/index.dart';
+import 'utils/index.dart';
 
-void main() async {
+/// From `--dart-define-from-file=dart_defines/<env>.json` (see .vscode/launch.json);
+/// development when run without it.
+const _env = String.fromEnvironment('ENV', defaultValue: 'development');
+
+Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  await configureInjection();
-  runApp(const MyApp());
-}
+  FlutterError.onError = (details) {
+    FlutterError.presentError(details); // console output / red screen in debug
+    if (kReleaseMode) reportError(details.exception, details.stack);
+  };
+  WidgetsBinding.instance.platformDispatcher.onError = (error, stackTrace) {
+    reportError(error, stackTrace);
+    return true;
+  };
 
-class MyApp extends StatefulWidget {
-  const MyApp({super.key});
-
-  @override
-  State<MyApp> createState() => _MyAppState();
-}
-
-class _MyAppState extends State<MyApp> {
-  late final _appRouter = GetIt.I.get<AppRouter>();
-
-  @override
-  Widget build(BuildContext context) {
-    return MaterialApp.router(
-      title: 'LuBase',
-      debugShowCheckedModeBanner: false,
-      theme: ThemeData(
-        colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
-        useMaterial3: true,
-      ),
-      builder: (context, child) {
-        return child!;
-      },
-      routerConfig: _appRouter.config(),
-      locale: Locale(Language.en.value),
-      supportedLocales: S.delegate.supportedLocales,
-      localizationsDelegates: const [
-        S.delegate,
-        GlobalMaterialLocalizations.delegate,
-        GlobalWidgetsLocalizations.delegate,
-        GlobalCupertinoLocalizations.delegate,
-      ],
-    );
-  }
-}
-
-class MyHomePage extends StatefulWidget {
-  const MyHomePage({super.key, required this.title});
-  final String title;
-
-  @override
-  State<MyHomePage> createState() => _MyHomePageState();
-}
-
-class _MyHomePageState extends State<MyHomePage> {
-  int _counter = 0;
-
-  void _incrementCounter() {
-    setState(() {
-      _counter++;
-    });
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        backgroundColor: Theme.of(context).colorScheme.inversePrimary,
-        title: Text(widget.title),
-      ),
-      body: Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: <Widget>[
-            Text(
-              'You have pushed the button this many times: ${S.current.app_title}',
-            ),
-            Text(
-              '$_counter',
-              style: Theme.of(context).textTheme.headlineMedium,
-            ),
-          ],
-        ),
-      ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: _incrementCounter,
-        tooltip: 'Increment',
-        child: const Icon(Icons.add),
-      ),
-    );
-  }
+  await Dependence.initDependence(AppFlavorValue.fromEnv(_env));
+  registerAppRouter();
+  runApp(const App());
 }

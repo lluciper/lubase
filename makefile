@@ -1,28 +1,17 @@
 l10n:
-	flutter pub global run intl_utils:generate
+	dart run intl_utils:generate
 
 gen:
-	flutter pub run build_runner build --delete-conflicting-outputs
+	dart run build_runner build
 
-# dart run build_runner build --delete-conflicting-outputs
+pub_get: 
+	flutter pub get
 
-watch:
-	dart run build_runner watch --delete-conflicting-outputs
+init: pub_get gen l10n
 
-pre_start:
-	@if [ ! -f lib/generated/l10n.dart ]; then \
-		echo "Generating localization files..."; \
-		$(FLUTTER) pub global run intl_utils:generate; \
-	fi
-	@if [ ! -d lib/src/generated ]; then \
-		echo "Running build_runner..."; \
-		dart run build_runner build --delete-conflicting-outputs; \
-	fi
-	@if [ ! -f lib/config/env.g.dart ]; then \
-		echo "Generating env files..."; \
-		dart pub get --directory=tools/gen_env; \
-		dart run tools/gen_env/lib/main.dart; \
-	fi
+# Same checks as CI (minus the generated-files diff).
+check:
+	dart analyze --fatal-infos
+	flutter test
 
-run: pre_start
-	$(FLUTTER) run
+	

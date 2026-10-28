@@ -1,99 +1,55 @@
 name: lubase
 description: "A new Flutter project."
-# The following line prevents the package from being accidentally published to
-# pub.dev using `flutter pub publish`. This is preferred for private packages.
-publish_to: 'none' # Remove this line if you wish to publish to pub.dev
+publish_to: 'none' 
 
-# The following defines the version and build number for your application.
-# A version number is three numbers separated by dots, like 1.2.43
-# followed by an optional build number separated by a +.
-# Both the version and the builder number may be overridden in flutter
-# build by specifying --build-name and --build-number, respectively.
-# In Android, build-name is used as versionName while build-number used as versionCode.
-# Read more about Android versioning at https://developer.android.com/studio/publish/versioning
-# In iOS, build-name is used as CFBundleShortVersionString while build-number is used as CFBundleVersion.
-# Read more about iOS versioning at
-# https://developer.apple.com/library/archive/documentation/General/Reference/InfoPlistKeyReference/Articles/CoreFoundationKeys.html
-# In Windows, build-name is used as the major, minor, and patch parts
-# of the product and file versions while build-number is used as the build suffix.
 version: 1.0.0+1
 
 environment:
-  sdk: ">=3.6.0 <4.0.0"
-
-# Dependencies specify other packages that your package needs in order to work.
-# To automatically upgrade your package dependencies to the latest versions
-# consider running `flutter pub upgrade --major-versions`. Alternatively,
-# dependencies can be manually updated by changing the version numbers below to
-# the latest version available on pub.dev. To see which dependencies have newer
-# versions available, run `flutter pub outdated`.
+  sdk: ^3.10.0
 dependencies:
   flutter:
     sdk: flutter
 
-
-  # The following adds the Cupertino Icons font to your application.
-  # Use with the CupertinoIcons class for iOS style icons.
-  cupertino_icons: ^1.0.8
-
-  # Route
-  auto_route: ^10.0.1
-
   # State management
   flutter_bloc: ^9.1.1
+  get_it: ^9.3.0
 
-  # HTTP
-  dio: ^5.8.0+1
-  retrofit: ^4.4.2
-  http: ^1.4.0
-  pretty_dio_logger: ^1.4.0
+  # UI
+  cupertino_icons: ^2.0.0
+  flutter_svg: ^2.2.2
+  visibility_detector: ^0.4.0+2
+  
+  # REST API
+  # http: ^1.4.0
+  dio: ^5.11.1
+  retrofit: ^4.9.1
 
-  # Image
-  cached_network_image: ^3.4.1
-  flutter_svg: ^2.2.0
+  # Store
+  shared_preferences: ^2.5.3
+  flutter_secure_storage: ^11.2.0
 
-  # Date time
-  intl: ^0.20.2
-
-  # Dependency injection
-  get_it: ^8.0.3
-  injectable: ^2.5.0
-  equatable: ^2.0.7
-
-  # Dart data class
+  # Utils 
+  connectivity_plus: ^7.0.0
+  freezed_annotation: ^3.1.0
+  go_router: ^18.1.1
   json_annotation: ^4.9.0
-  freezed: ^3.0.6
-
-  # Localizations
+  logger: ^2.6.2
   flutter_localizations:
     sdk: flutter
-
-  # Local storage
-  shared_preferences: ^2.5.3
-  flutter_secure_storage: ^9.2.4
-
-
-  # Linting
-
+  intl: any
 dev_dependencies:
   flutter_test:
     sdk: flutter
 
-  # Gen
-  build_runner: ^2.5.3
-
-  # Code generators
-  auto_route_generator: ^10.2.3
-  retrofit_generator: ^9.2.0
-  injectable_generator: ^2.7.0
-  json_serializable: ^6.9.5
-  freezed_annotation: ^3.0.0
-
-  # Gen assets
-  flutter_gen_runner: ^5.10.0
-
   flutter_lints: ^6.0.0
 
+  build_runner: ^2.10.4
+  freezed: ^4.0.3
+  retrofit_generator: ^10.2.0
+  json_serializable: ^6.11.1
+  flutter_gen_runner: ^5.12.0
+  go_router_builder: ^4.1.1
+  intl_utils: ^2.8.17
 flutter_gen:
   output: lib/resources/generated/
   integrations:
@@ -105,15 +61,14 @@ flutter_gen:
     outputs:
       style: camel-case
 
-flutter_intl:
-  enabled: true # Required. Must be set to true to activate the package. Default: false
-  class_name: S # Optional. Sets the name for the generated localization class. Default: S
-  main_locale: vi # Optional. Sets the main locale used for generating localization files. Provided value should consist of language code and optional script and country codes separated with underscore (e.g. 'en', 'en_GB', 'zh_Hans', 'zh_Hans_CN'). Default: en
-  arb_dir: lib/resources/l10n
-  output_dir: lib/resources/generated/
-
 flutter:
   uses-material-design: true
+  generate: true
+
+flutter_intl:
+  enabled: true
+  arb_dir: lib/resources/l10n
+  output_dir: lib/resources/generated/
 
   assets:
     - assets/images/

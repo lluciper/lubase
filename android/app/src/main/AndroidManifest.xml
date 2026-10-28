@@ -1,6 +1,12 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
+    <!-- Release builds need it too: Flutter's template only adds it to the
+         debug/profile manifests, so a release APK could not reach the API. -->
+    <uses-permission android:name="android.permission.INTERNET"/>
+    <!-- allowBackup=false: flutter_secure_storage keys cannot be restored from a
+         backup (InvalidKeyException), see its README "Disabling Auto Backup". -->
     <application
-        android:label="lubase"
+        android:label="@string/app_name"
+        android:allowBackup="false"
         android:name="${applicationName}"
         android:icon="@mipmap/ic_launcher">
         <activity
@@ -23,6 +29,13 @@
             <intent-filter>
                 <action android:name="android.intent.action.MAIN"/>
                 <category android:name="android.intent.category.LAUNCHER"/>
+            </intent-filter>
+            <!-- Deep link: lubase://app/<route>, e.g. lubase://app/home -->
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+                <data android:scheme="lubase" />
             </intent-filter>
         </activity>
         <!-- Don't delete the meta-data below.
