@@ -105,19 +105,27 @@ lib/
 ├── app.dart                   # MaterialApp.router: router, LocaleCubit, ThemeCubit (đọc từ getIt)
 ├── app_router.dart            # Toàn bộ route (typed), deep link, guard — composition root, biết mọi page
 ├── core/                      # Hạ tầng base — KHÔNG biết feature nào, hiếm khi sửa
-│   ├── base_page.dart         # BasePage / BasePageState + FutureEx (loading, error)
-│   ├── base_view_model.dart   # BaseViewModel (Cubit) + viewModel.listen(context, …)
-│   ├── dependence.dart        # getIt + composition root: Dio, storage, Repository → getIt
-│   ├── app_flavor.dart, refresh_service.dart
-│   ├── locale_support.dart, theme_support.dart   # State toàn app: LocaleCubit, ThemeCubit (trong getIt)
-│   ├── widgets/               # Widget hạ tầng: BaseDialog, DialogPlatform, LoadingWrapper…
+│   ├── base/                  # base_page (BasePage/BasePageState + FutureEx), base_view_model (Cubit + listen)
+│   ├── config/                # app_flavor — môi trường dev/stg/prod
+│   ├── di/                    # dependence — getIt + composition root: Dio, storage, Repository
+│   ├── lifecycle/             # refresh_service, visibility_wrapper — page hiện/ẩn, làm mới khi quay lại
+│   ├── settings/              # locale_support, theme_support — state toàn app: LocaleCubit, ThemeCubit
+│   ├── widgets/
+│   │   ├── dialog/            # BaseDialog, DialogPlatform
+│   │   └── loading/           # LoadingWrapper, ProgressIndicatorPlatform
 │   └── index.dart             # Barrel export
 ├── data/                      # M — Model layer
 │   ├── models/
-│   │   ├── <domain>/          # DTO theo domain, trùng tên repository: auth/ ↔ auth_repository.dart
+│   │   ├── <domain>/          # DTO theo domain, trùng tên repository: auth/ ↔ repositories/auth/
 │   │   └── common/            # (tạo khi cần) DTO dùng chung, vd. envelope của backend
-│   ├── repositories/          # <domain>_repository.dart; `Repository` gom tất cả (repository.auth…)
-│   ├── services/              # DioClient (retrofit), ApiConstants, interceptor, SecureStorage, SharePreference
+│   ├── repositories/
+│   │   ├── <domain>/          # <domain>_repository.dart (+ bản demo/fake của domain đó)
+│   │   └── repository.dart    # `Repository` gom tất cả (repository.auth…)
+│   ├── services/
+│   │   ├── api/               # ApiConstants, DioClient (retrofit)
+│   │   ├── interceptors/      # DioInterceptor (token/refresh), LoggerInterceptor
+│   │   ├── storage/           # SecureStorage, SharePreference, LocalStorageKey
+│   │   └── services.dart      # `Services` gom service cho repository
 │   └── index.dart
 ├── view/                      # V + VM — UI layer
 │   ├── entities/              # Value object cho form (freezed): valid + errorText()
@@ -128,7 +136,12 @@ lib/
 │       ├── <feature>_state.dart       # State (freezed) — bỏ qua nếu state là kiểu đơn giản
 │       └── widgets/                   # Widget chỉ dùng trong feature này
 ├── resources/                 # Màu (context.colors), ARB, file generated (S, Assets)
-└── utils/                     # Helper, constant, extensions/ (part library) — không phụ thuộc core/
+└── utils/                     # Không phụ thuộc core/
+    ├── constants/             # regex_constants
+    ├── error/                 # error_helper (lỗi → thông báo), error_reporter (lỗi không bắt được)
+    ├── extensions/            # extension (part library)
+    ├── logger/                # logger_helper
+    └── network/               # network_helper (kiểm tra mạng)
 test/                          # Mirror cấu trúc lib/; fake dùng chung ở test/helpers/fakes.dart
 ```
 
@@ -138,17 +151,19 @@ test/                          # Mirror cấu trúc lib/; fake dùng chung ở t
 |---|---|
 | DTO request/response | `data/models/<domain>/<tên>_model.dart` (dùng chung → `models/common/`) |
 | Endpoint | hằng trong `ApiConstants` + method trong `DioClient` |
-| Logic gọi API / lưu trữ | `data/repositories/<domain>_repository.dart` |
+| Logic gọi API / lưu trữ | `data/repositories/<domain>/<domain>_repository.dart` |
 | Màn hình | `view/features/<feature>/` (page + view_model + state) |
 | Widget của 1 feature | `view/features/<feature>/widgets/` |
 | Widget dùng ở ≥ 2 feature | `view/widgets/` |
-| Widget/hạ tầng cho mọi page (dialog, loading…) | `core/widgets/` |
+| Widget/hạ tầng cho mọi page | `core/widgets/<loại>/` (`dialog/`, `loading/`…) |
+| Interceptor Dio | `data/services/interceptors/` |
+| Lưu trữ cục bộ (key, storage) | `data/services/storage/` |
 | Validate input form | `view/entities/<tên>_entity.dart` |
 | Route, guard đăng nhập | `lib/app_router.dart` |
 | Scheme deep link | `android/app/src/main/AndroidManifest.xml` (intent-filter) + `ios/Runner/Info.plist` (`CFBundleURLTypes`) |
-| State toàn app (ngôn ngữ, theme…) | `core/` (Cubit, đăng ký trong `Dependence.register`) |
+| State toàn app (ngôn ngữ, theme…) | `core/settings/` (Cubit, đăng ký trong `Dependence.register`) |
 
-Giữ cấu trúc phẳng: chỉ `models/` chia thư mục con theo domain; không tạo thư mục con trong `services/`, `repositories/`, `entities/`, `utils/` khi chưa vượt ~15 file; không tạo `view_model/`, `components/` trong feature.
+**Mỗi thư mục chỉ chứa file cùng chức năng**: trong `core/`, `data/` và `utils/`, file mới vào thư mục con đúng chức năng ở trên; chức năng mới chưa có chỗ → tạo thư mục con mới (tên số ít/chung: `api/`, `storage/`…) và ghi vào cây thư mục này. `models/` và `repositories/` chia theo domain. Thư mục con chỉ để nhóm, không tạo barrel riêng — export vẫn qua `core/index.dart`, `data/index.dart`, `utils/index.dart`. `view/` giữ nguyên: `entities/` theo chức năng, `features/<feature>/` theo màn (trong feature không tạo `view_model/`, `components/`).
 
 ## Quy tắc phụ thuộc giữa các thư mục
 
@@ -205,7 +220,7 @@ Luồng một chiều: **View → ViewModel → Repository → Service**.
 
 ### Model (`data/`)
 - DTO: `@JsonSerializable()`, mọi field có `@JsonKey(name: ...)`, có `fromJson`/`toJson`.
-- Repository mới: tạo `<domain>_repository.dart`, thêm field vào `Repository`, export trong `data/index.dart`.
+- Repository mới: tạo `repositories/<domain>/<domain>_repository.dart`, thêm field vào `Repository`, export trong `data/index.dart`.
 - Dependency được tạo một chỗ trong `Dependence.initDependence` và đăng ký vào **`getIt` — biến toàn cục duy nhất** (không gọi `GetIt.instance`, không thêm singleton/static khác). Router đăng ký bằng `registerAppRouter()`. Test đăng ký fake qua `Dependence.register(...)` như app thật và `getIt.reset()` sau test.
 - HTTP: thành công = mọi status 2xx; lỗi được chuẩn hoá (timeout → `connectionTimeout`, mất mạng → `connectionError`).
 - Thông báo lỗi (`ErrorHelper`): 4xx → `msg` (hoặc `error`) dạng chuỗi trong body của server; 5xx → `server_error`; timeout/mất mạng → message tương ứng; lỗi không phải API → `unknown_error`. **Không bao giờ hiện `toString()`** cho người dùng. Đổi tên khoá theo backend trong `ErrorHelper._serverMessage`.
@@ -239,14 +254,14 @@ Luồng một chiều: **View → ViewModel → Repository → Service**.
 
 ### Logging
 - Dùng `LoggerHelper` (chỉ chạy ở debug, `kDebugMode`); request/response Dio log qua `LoggerInterceptor` — **chỉ gắn ở debug** (nó chuyển cả body thành chuỗi trên UI isolate) và không in body của endpoint đăng nhập/refresh (mật khẩu, token). Không dùng `print` hay `LogInterceptor` của Dio.
-- Lỗi không bắt được (framework: `FlutterError.onError`, async: `PlatformDispatcher.onError`, gắn trong `main.dart`) đi về **một chỗ**: `reportError` (`lib/utils/error_reporter.dart`) — nơi gắn Crashlytics/Sentry khi dự án chọn.
+- Lỗi không bắt được (framework: `FlutterError.onError`, async: `PlatformDispatcher.onError`, gắn trong `main.dart`) đi về **một chỗ**: `reportError` (`lib/utils/error/error_reporter.dart`) — nơi gắn Crashlytics/Sentry khi dự án chọn.
 
 ## Thêm một feature (checklist)
 
 > Làm trọn vẹn từ một yêu cầu (phân tích → code → test → review): `/feature-team <yêu cầu>`.
 
 1. `data/models/<domain>/` — DTO → `make gen`.
-2. `ApiConstants` + `DioClient` + `<domain>_repository.dart` (+ đăng ký trong `Repository`).
+2. `ApiConstants` + `DioClient` + `repositories/<domain>/<domain>_repository.dart` (+ đăng ký trong `Repository`).
 3. `view/features/<feature>/<feature>_state.dart` + `<feature>_view_model.dart`.
 4. `<feature>_page.dart` kế thừa `BasePage`, override `createViewModel()`.
 5. Route trong `lib/app_router.dart`: `class XRoute extends GoRouteData with $XRoute` (+ path trong `RouterPath`) → `make gen`. Điều hướng bằng `XRoute().push(context)` / `.go(context)`. Màn cần đăng nhập → override `redirect` như `HomeRoute`; mở được bằng deep link sẵn (không cần cấu hình thêm).
@@ -259,17 +274,19 @@ Test của base là "hợp đồng" của base — **sửa `core/`, `utils/`, `d
 
 | Phần | File test |
 |---|---|
-| `BaseViewModel`, `listen(context)`, `LoadingWrapperViewModel` | `test/core/base_view_model_test.dart` |
-| `BasePage` (lifecycle, giữ VM sống, đóng VM khi page đóng, loading, dialog lỗi, refresh, đổi ngôn ngữ, dispose an toàn) + `FutureEx` | `test/core/base_page_test.dart` |
-| `LocaleCubit`, `ThemeCubit`, `RefreshService` | `test/core/app_settings_test.dart` |
-| `DialogPlatform` / `BaseDialog` | `test/core/widgets/dialog_platform_test.dart` |
-| `DioInterceptor` (token, refresh 401 dùng chung, retry, force logout, 2xx, content type, kiểm tra mạng chỉ khi lỗi, body 401 lạ, storage lỗi, retry `FormData`, đăng xuất giữa lúc refresh) | `test/data/services/dio_interceptor_test.dart` |
-| `AuthRepository` (lưu token, `isLoggedIn`, storage lỗi, `logout` + `sessionEnded`), `DemoAuthRepository` (không gọi API) | `test/data/repositories/auth_repository_test.dart` |
+| `BaseViewModel`, `listen(context)`, `LoadingWrapperViewModel` | `test/core/base/base_view_model_test.dart` |
+| `BasePage` (lifecycle, giữ VM sống, đóng VM khi page đóng, loading, dialog lỗi, refresh, đổi ngôn ngữ, dispose an toàn) + `FutureEx` | `test/core/base/base_page_test.dart` |
+| `LocaleCubit`, `ThemeCubit` | `test/core/settings/app_settings_test.dart` |
+| `RefreshService` | `test/core/lifecycle/refresh_service_test.dart` |
+| `DialogPlatform` / `BaseDialog` | `test/core/widgets/dialog/dialog_platform_test.dart` |
+| `DioInterceptor` (token, refresh 401 dùng chung, retry, force logout, 2xx, content type, kiểm tra mạng chỉ khi lỗi, body 401 lạ, storage lỗi, retry `FormData`, đăng xuất giữa lúc refresh) | `test/data/services/interceptors/dio_interceptor_test.dart` |
+| `AuthRepository` (lưu token, `isLoggedIn`, storage lỗi, `logout` + `sessionEnded`), `DemoAuthRepository` (không gọi API) | `test/data/repositories/auth/auth_repository_test.dart` |
 | `App` (router, bản dịch, theme như `main.dart` chạy) | `test/app_test.dart` |
 | Cấu hình native (INTERNET, `allowBackup`, scheme deep link) + `launch.json` ↔ `dart_defines` ↔ `ENV` ↔ flavor Android | `test/platform_config_test.dart` |
-| `Dependence` (dọn token sau khi cài lại, login giả chỉ ở development), `AppFlavorValue.fromEnv` | `test/core/dependence_test.dart`, `test/core/app_flavor_test.dart` |
+| `Dependence` (dọn token sau khi cài lại, login giả chỉ ở development), `AppFlavorValue.fromEnv` | `test/core/di/dependence_test.dart`, `test/core/config/app_flavor_test.dart` |
 | Entities | `test/view/entities/entities_test.dart` |
-| Extensions, `ErrorHelper` | `test/utils/utils_test.dart` |
+| `ErrorHelper` | `test/utils/error/error_helper_test.dart` |
+| Extensions | `test/utils/extensions/string_ex_test.dart` |
 | Router: màn đầu theo token, deep link (cold/warm), param, guard, hết phiên/đăng xuất → Login, location lạ, Home → Detail | `test/app_router_test.dart` |
 | Feature mẫu: ViewModel / Page (điều hướng qua router thật) | `test/view/features/login/login_view_model_test.dart`, `login_page_test.dart` |
 
@@ -313,4 +330,4 @@ Chỉ những chỗ sau khác `lu_base_riverpod`; mọi file khác giống hệt
 | Param route | provider family | `ValueKey(id)` cho page trong `DetailRoute.build` |
 | Test | `ProviderScope(overrides: …)`, `ProviderContainer.test` | `Dependence.register(fake)` + `getIt.reset()`; `pump(Duration.zero)` sau khi đổi state |
 | Lint | `riverpod_lint` | không có (xem mục Công nghệ) |
-| File khác | — | `lib/{main,app,app_router}.dart`, `lib/core/{base_page,base_view_model,dependence,locale_support,theme_support}.dart`, `lib/core/widgets/loading_wrapper.dart`, `lib/data/repositories/repository.dart`, page + view_model của 3 feature, `login_panel.dart`, 8 file test |
+| File khác | — | `lib/{main,app,app_router}.dart`, `lib/core/base/{base_page,base_view_model}.dart`, `lib/core/di/dependence.dart`, `lib/core/settings/{locale_support,theme_support}.dart`, `lib/core/widgets/loading/loading_wrapper.dart`, `lib/data/repositories/repository.dart`, page + view_model của 3 feature, `login_panel.dart`, 8 file test |

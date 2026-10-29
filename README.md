@@ -122,9 +122,9 @@ Skill sẽ hỏi lại những gì còn thiếu, ghi mục tiêu vào [`PROJECT.
 | 1 | **Tên app & bundle id** | Android: `android/app/build.gradle.kts` (`namespace`, `applicationId`, `resValue("string", "app_name", …)` từng flavor) và chuyển `MainActivity.kt` sang thư mục package mới · iOS: `PRODUCT_BUNDLE_IDENTIFIER`, `CFBundleDisplayName` · Web: `web/index.html`, `web/manifest.json` |
 | 2 | **Scheme deep link** | `AndroidManifest.xml` (`android:scheme`), `Info.plist` (`CFBundleURLSchemes`), test `test/app_router_test.dart` và `test/platform_config_test.dart` |
 | 3 | **Ký app iOS** | Xcode → Runner → *Signing & Capabilities* → chọn Team của bạn |
-| 4 | **Base URL từng môi trường** | `lib/data/services/api_constants.dart` (`devBaseUrl`, `stagingBaseUrl`, `prodBaseUrl`) |
+| 4 | **Base URL từng môi trường** | `lib/data/services/api/api_constants.dart` (`devBaseUrl`, `stagingBaseUrl`, `prodBaseUrl`) |
 | 5 | **API đăng nhập** | `ApiConstants.login` / `refreshToken`, DTO trong `lib/data/models/auth/`, mã lỗi từ chối refresh trong `DioInterceptor._isRefreshRejected`, khoá `forceLogout`, khoá thông báo lỗi trong `ErrorHelper._serverMessage` |
-| 6 | **Tắt đăng nhập giả** khi dev đã có API | `lib/core/dependence.dart` → `demoLogin: false`, xoá `DemoAuthRepository` |
+| 6 | **Tắt đăng nhập giả** khi dev đã có API | `lib/core/di/dependence.dart` → `demoLogin: false`, xoá `DemoAuthRepository` |
 | 7 | **Màu, font, icon** | `lib/resources/app_colors.dart`, `pubspec.yaml` (`fonts:`), `assets/` → `make gen` |
 | 8 | **Ngôn ngữ** | `lib/resources/l10n/intl_*.arb` → `make l10n` |
 | 9 | **Màn mẫu** | Login / Home / Detail: giữ làm mẫu hoặc thay bằng màn thật |
@@ -216,20 +216,21 @@ lib/
 ├── app.dart               # MaterialApp.router: router, ngôn ngữ, theme
 ├── app_router.dart        # Toàn bộ route (typed), deep link, guard đăng nhập
 ├── core/                  # Hạ tầng base — KHÔNG biết feature nào
-│   ├── base_page.dart     # BasePage / BasePageState + loading & xử lý lỗi (FutureEx)
-│   ├── base_view_model.dart
-│   ├── dependence.dart    # Composition root: Dio, storage, Repository
-│   ├── app_flavor.dart · locale_support.dart · theme_support.dart · refresh_service.dart
-│   └── widgets/           # BaseDialog, DialogPlatform, LoadingWrapper…
+│   ├── base/              # BasePage / BasePageState (+ FutureEx), BaseViewModel
+│   ├── config/            # Môi trường (AppFlavor)
+│   ├── di/                # getIt + composition root: Dio, storage, Repository
+│   ├── lifecycle/         # RefreshService, VisibilityWrapper
+│   ├── settings/          # LocaleCubit, ThemeCubit
+│   └── widgets/           # dialog/ (BaseDialog, DialogPlatform) · loading/ (LoadingWrapper…)
 ├── data/                  # M — Model
 │   ├── models/<domain>/   # DTO theo domain (auth/…)
-│   ├── repositories/      # <domain>_repository.dart + Repository gom tất cả
-│   └── services/          # DioClient (retrofit), interceptor, SecureStorage…
+│   ├── repositories/      # <domain>/<domain>_repository.dart + Repository gom tất cả
+│   └── services/          # api/ (DioClient, ApiConstants) · interceptors/ · storage/ + Services
 ├── view/                  # V + VM
 │   ├── entities/          # Validate input form (email, password…)
 │   └── features/<feature>/  # <feature>_page / _view_model / _state + widgets/
 ├── resources/             # Màu, ARB, file sinh (S, Assets)
-└── utils/                 # Helper, extension
+└── utils/                 # constants/ · error/ · extensions/ · logger/ · network/
 test/                      # Mirror lib/; fake dùng chung ở test/helpers/fakes.dart
 dart_defines/              # Biến môi trường (ENV) cho dev / stg / prod
 .vscode/launch.json        # Cấu hình chạy dev|stg|prod × iOS|Android
@@ -326,7 +327,7 @@ flowchart LR
 
 - Không bao giờ hiện `toString()` cho người dùng.
 - Log request/response chỉ ở bản debug, không in body đăng nhập/refresh (mật khẩu, token).
-- Mọi lỗi không bắt được đi về `lib/utils/error_reporter.dart` — chỗ gắn Crashlytics/Sentry.
+- Mọi lỗi không bắt được đi về `lib/utils/error/error_reporter.dart` — chỗ gắn Crashlytics/Sentry.
 
 ### Đa ngôn ngữ & theme
 
@@ -342,7 +343,7 @@ flowchart LR
 **Cách tay:**
 
 1. DTO trong `lib/data/models/<domain>/` → `make gen`
-2. Endpoint trong `ApiConstants` + `DioClient`, logic trong `<domain>_repository.dart`
+2. Endpoint trong `ApiConstants` + `DioClient`, logic trong `repositories/<domain>/<domain>_repository.dart`
 3. `view/features/<feature>/`: `_state.dart` (freezed), `_view_model.dart`, `_page.dart`
 4. Route trong `lib/app_router.dart` → `make gen` (deep link chạy được luôn)
 5. Chuỗi vào **cả** `intl_en.arb` và `intl_vi.arb` → `make l10n`
@@ -360,8 +361,8 @@ make check     # dart analyze --fatal-infos + flutter test
 
 | Phần | File test |
 |---|---|
-| BasePage, loading, dialog lỗi, đổi ngôn ngữ | `test/core/base_page_test.dart` |
-| Interceptor: refresh dùng chung, retry, chính sách đăng xuất | `test/data/services/dio_interceptor_test.dart` |
+| BasePage, loading, dialog lỗi, đổi ngôn ngữ | `test/core/base/base_page_test.dart` |
+| Interceptor: refresh dùng chung, retry, chính sách đăng xuất | `test/data/services/interceptors/dio_interceptor_test.dart` |
 | Router: deep link, guard, hết phiên | `test/app_router_test.dart` |
 | App: router + ngôn ngữ + theme | `test/app_test.dart` |
 | Cấu hình native & môi trường | `test/platform_config_test.dart` |

@@ -34,7 +34,7 @@ Scheme deep link (`lubase://`): `android/app/src/main/AndroidManifest.xml` (`<da
 
 Khác:
 - `pubspec.yaml`: `description`, `version`.
-- **Dart package name** (`name: lubase`) — chỉ đổi khi người dùng yêu cầu (xác nhận trước): sửa `name`, thay mọi `package:lubase/` trong `lib/` và `test/`, sửa `excludePaths` trong `lib/utils/logger_helper.dart`, rồi `flutter pub get` + `make gen`.
+- **Dart package name** (`name: lubase`) — chỉ đổi khi người dùng yêu cầu (xác nhận trước): sửa `name`, thay mọi `package:lubase/` trong `lib/` và `test/`, sửa `excludePaths` trong `lib/utils/logger/logger_helper.dart`, rồi `flutter pub get` + `make gen`.
 
 Kiểm chứng: `grep -rn "lubase\|com\.example" android ios macos web linux windows pubspec.yaml lib test` chỉ còn những chỗ cố ý giữ; build nền tảng chính.
 
@@ -44,8 +44,8 @@ Kiểm chứng: `grep -rn "lubase\|com\.example" android ios macos web linux win
 
 **Khi nào:** luôn làm.
 
-- `lib/data/services/api_constants.dart`: `devBaseUrl`, `prodBaseUrl` (+ `stagingBaseUrl` nếu có).
-- `lib/core/app_flavor.dart`: `AppFlavorType`, `AppFlavorValue` (thêm staging nếu có).
+- `lib/data/services/api/api_constants.dart`: `devBaseUrl`, `prodBaseUrl` (+ `stagingBaseUrl` nếu có).
+- `lib/core/config/app_flavor.dart`: `AppFlavorType`, `AppFlavorValue` (thêm staging nếu có).
 - Base đã có 3 môi trường dev/stg/prod: `dart_defines/*.json` (`ENV`) + `.vscode/launch.json` + flavor Android `dev`/`stage`/`prod` (xem mục "Môi trường" trong `CLAUDE.md`). Việc cần làm: điền base URL thật cho từng môi trường trong `ApiConstants`; bỏ/thêm môi trường thì sửa đồng bộ các chỗ đó (`test/platform_config_test.dart` canh lệch).
 - iOS chưa có flavor (scheme + xcconfig): chỉ tạo khi người dùng cần cài song song nhiều bản trên iOS — hỏi trước.
 - `LoggerHelper` bật theo `kDebugMode`, không theo môi trường.
@@ -59,10 +59,10 @@ Kiểm chứng: `dart analyze`; chạy app trỏ đúng base URL (log `LoggerInt
 **Khi nào:** có tài liệu/ví dụ response của backend.
 
 - Envelope (vd. `{success, data, msg}`): base trả thẳng object. Backend có envelope → tạo DTO generic trong `lib/data/models/common/` (`@JsonSerializable(genericArgumentFactories: true)`), `DioClient` trả nó và repository bóc `data`. Ghi quyết định vào `PROJECT.md` §5/§7.
-- Định dạng lỗi: `ErrorHelper` (`lib/utils/error_helper.dart`) đã hiện `msg`/`error` (chuỗi) của body cho 4xx và `server_error` cho 5xx — đổi tên khoá trong `_serverMessage` theo backend; cập nhật test trong `test/utils/utils_test.dart`.
-- Cờ hết phiên kiểu `forceLogout`: đổi khoá trong `DioInterceptor._isForceLogout` (đọc thẳng body, không qua DTO) theo backend; cập nhật test trong `test/data/services/dio_interceptor_test.dart`.
-- Header `Accept-Language` đang cố định `'vi'` trong `lib/data/services/dio_interceptor.dart` → đặt theo ngôn ngữ mặc định, hoặc truyền callback lấy ngôn ngữ hiện tại từ `Dependence` (data/ không được import core/).
-- Timeout: `lib/core/dependence.dart` (mặc định 20s).
+- Định dạng lỗi: `ErrorHelper` (`lib/utils/error/error_helper.dart`) đã hiện `msg`/`error` (chuỗi) của body cho 4xx và `server_error` cho 5xx — đổi tên khoá trong `_serverMessage` theo backend; cập nhật test trong `test/utils/error/error_helper_test.dart`.
+- Cờ hết phiên kiểu `forceLogout`: đổi khoá trong `DioInterceptor._isForceLogout` (đọc thẳng body, không qua DTO) theo backend; cập nhật test trong `test/data/services/interceptors/dio_interceptor_test.dart`.
+- Header `Accept-Language` đang cố định `'vi'` trong `lib/data/services/interceptors/dio_interceptor.dart` → đặt theo ngôn ngữ mặc định, hoặc truyền callback lấy ngôn ngữ hiện tại từ `Dependence` (data/ không được import core/).
+- Timeout: `lib/core/di/dependence.dart` (mặc định 20s).
 
 Kiểm chứng: test parse DTO với JSON mẫu thật của backend; `flutter test test/data`.
 
@@ -72,7 +72,7 @@ Kiểm chứng: test parse DTO với JSON mẫu thật của backend; `flutter t
 
 **Khi nào:** app có đăng nhập.
 
-- Login: `ApiConstants.login`, `LoginRequestModel`, `LoginResponseModel` (tên field token theo backend). API dev đã login được → trong `lib/core/dependence.dart` đặt `demoLogin: false`, xoá `DemoAuthRepository` và test của nó.
+- Login: `ApiConstants.login`, `LoginRequestModel`, `LoginResponseModel` (tên field token theo backend). API dev đã login được → trong `lib/core/di/dependence.dart` đặt `demoLogin: false`, xoá `DemoAuthRepository` và test của nó.
 - Refresh token:
   - Có: `ApiConstants.refreshToken`, `RefreshTokenRequestModel`, `DioInterceptor._requestNewToken` theo đúng API. Mã lỗi mà refresh endpoint dùng để **từ chối** (mặc định 400/401/403) → `DioInterceptor._isRefreshRejected`; chỉ những mã này mới đăng xuất.
   - Không có: `_handleUnauthorized` chỉ cần logout + trả lỗi; xoá endpoint/DTO refresh; cập nhật `dio_interceptor_test.dart` (bỏ các test refresh, giữ test 401 → xoá token) và mục "Auth & token" trong `CLAUDE.md`.
@@ -103,9 +103,9 @@ Kiểm chứng: `make gen`, `dart analyze`, chạy app xem màu/font.
 
 **Khi nào:** luôn kiểm tra.
 
-- `lib/core/locale_support.dart`: `SupportLocale` (hằng + `support`), mặc định trong constructor `LocaleCubit()`.
+- `lib/core/settings/locale_support.dart`: `SupportLocale` (hằng + `support`), mặc định trong constructor `LocaleCubit()`.
 - ARB: mỗi ngôn ngữ một `lib/resources/l10n/intl_<code>.arb`, cùng bộ key → `make l10n`.
-- Bỏ ngôn ngữ: xoá ARB + `SupportLocale` + cập nhật `test/core/app_settings_test.dart`.
+- Bỏ ngôn ngữ: xoá ARB + `SupportLocale` + cập nhật `test/core/settings/app_settings_test.dart`.
 - Base **không lưu** ngôn ngữ đã chọn (mỗi lần mở app về mặc định). Cần lưu → feature: đọc/ghi qua repository dùng `SharePreference`.
 - Đồng bộ header `Accept-Language` (nhóm C).
 

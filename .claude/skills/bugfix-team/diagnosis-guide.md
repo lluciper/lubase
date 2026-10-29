@@ -21,7 +21,7 @@ Dành cho base MVVM + Bloc (Cubit) + get_it này. Dùng ở bước "Tái hiện
 |---|---|---|
 | Loading không tắt | future không bao giờ complete (thiếu `return`/`await`); lỗi bị nuốt ở VM trước khi tới page; gọi `showLoadingDialog` tay mà không `dismissLoadingDialog` | method VM trả `Future` đúng chưa; chuỗi `subscribe…` ở page |
 | Không hiện dialog lỗi | thiếu `.subscribeHandleError(this)` hoặc không đứng cuối chuỗi; VM `try/catch` nuốt lỗi | chuỗi gọi ở page; `catch` trong VM/repository |
-| Hiện nhiều dialog lỗi | tự gọi `handleError` thay vì `handlerFutureError`; nhiều chuỗi với `onError` riêng | `lib/core/base_page.dart` |
+| Hiện nhiều dialog lỗi | tự gọi `handleError` thay vì `handlerFutureError`; nhiều chuỗi với `onError` riêng | `lib/core/base/base_page.dart` |
 | `ArgumentError (onError): The error handler of Future.catchError must return a value…` | code feature tự viết `catchError` trả `void` trên `Future` non-null | dùng `subscribeHandleError` hoặc trả giá trị đúng kiểu |
 
 ## Mạng & API
@@ -30,11 +30,11 @@ Dành cho base MVVM + Bloc (Cubit) + get_it này. Dùng ở bước "Tái hiện
 |---|---|---|
 | Chạy debug được nhưng bản **release Android** báo lỗi mạng mọi request | thiếu `android.permission.INTERNET` trong manifest `main` | `android/app/src/main/AndroidManifest.xml`, `test/platform_config_test.dart` |
 | Request treo mãi, loading quay không tắt | dio < 5.11 (interceptor async ném lỗi thì request treo) | `pubspec.yaml` (`dio: ^5.11.1`), `pubspec.lock` |
-| Mọi request báo mất mạng (`connectionError`) | base URL sai (`AppFlavorValue`, `ApiConstants`, sai file `dart_defines`); emulator không có mạng (interceptor chỉ kiểm tra mạng khi lỗi không có response) | `lib/core/app_flavor.dart`, log `LoggerInterceptor` (debug) |
+| Mọi request báo mất mạng (`connectionError`) | base URL sai (`AppFlavorValue`, `ApiConstants`, sai file `dart_defines`); emulator không có mạng (interceptor chỉ kiểm tra mạng khi lỗi không có response) | `lib/core/config/app_flavor.dart`, log `LoggerInterceptor` (debug) |
 | Gọi API thành công nhưng app báo lỗi | JSON khác DTO: sai key, field `null` nhưng DTO non-null, số dạng chuỗi, định dạng ngày → lỗi trong `fromJson` | so JSON thật (log debug) với DTO; viết test parse với JSON đó |
-| 401 lặp lại / bị đăng xuất liên tục | token chưa được lưu (đăng nhập không qua `AuthRepository.login`); endpoint login/refresh chưa nằm trong `ApiConstants.nonAuthenticatedPaths`; refresh endpoint trả 400/401/403 (bị từ chối → đăng xuất là đúng thiết kế); mất mạng/timeout/5xx khi refresh hay 401 sau khi refresh thành công thì **không** được đăng xuất (`_isRefreshRejected`) | `dio_interceptor.dart`, `auth_repository.dart`, `test/data/services/dio_interceptor_test.dart` |
+| 401 lặp lại / bị đăng xuất liên tục | token chưa được lưu (đăng nhập không qua `AuthRepository.login`); endpoint login/refresh chưa nằm trong `ApiConstants.nonAuthenticatedPaths`; refresh endpoint trả 400/401/403 (bị từ chối → đăng xuất là đúng thiết kế); mất mạng/timeout/5xx khi refresh hay 401 sau khi refresh thành công thì **không** được đăng xuất (`_isRefreshRejected`) | `dio_interceptor.dart`, `auth_repository.dart`, `test/data/services/interceptors/dio_interceptor_test.dart` |
 | Hết phiên mà không về Login / về Login sai lúc | màn mới không nằm dưới guard (`redirect`) ; router không nhận `refreshListenable`; xoá token không qua `SecureStorage.clearTokens` | `lib/app_router.dart`, `test/app_router_test.dart` (group `session end`) |
-| Cài lại app trên iOS vẫn "đã đăng nhập" / người dùng bị đăng xuất sau khi cập nhật | cơ chế cờ `LocalStorageKey.installed` trong `Dependence` | `lib/core/dependence.dart`, `test/core/dependence_test.dart` |
+| Cài lại app trên iOS vẫn "đã đăng nhập" / người dùng bị đăng xuất sau khi cập nhật | cơ chế cờ `LocalStorageKey.installed` trong `Dependence` | `lib/core/di/dependence.dart`, `test/core/di/dependence_test.dart` |
 | Upload/form-urlencoded bị server từ chối | header `Content-Type` bị ép ở interceptor (base đã bỏ — kiểm tra code feature) | `DioInterceptor.onRequest` |
 | Nhiều request cùng gọi refresh | interceptor bị đổi sang `QueuedInterceptorsWrapper` hoặc tự viết refresh ngoài `_refreshAccessToken` | giữ cơ chế `Completer` dùng chung |
 | Server trả tiếng Việt dù app đang tiếng Anh | header `Accept-Language` cố định `'vi'` | `DioInterceptor.onRequest` |
@@ -50,7 +50,7 @@ Dành cho base MVVM + Bloc (Cubit) + get_it này. Dùng ở bước "Tái hiện
 | Overflow (vạch vàng đen) | `Column`/`Row` không cuộn; chuỗi tiếng Việt dài hơn; màn hình nhỏ/tablet | widget test với `tester.view.physicalSize` + `addTearDown(tester.view.reset)` |
 | Bàn phím che ô nhập | page override `resizeToAvoidBottomInset => false`, hoặc body không cuộn được | `BasePage` mặc định `true`; bọc body bằng `SingleChildScrollView` |
 | `backgroundColor`/`hasUseSafeArea` không ăn | override sai chỗ (trong widget con thay vì State của page) | override getter trong `BasePageState` |
-| `onAppearedPage`/`onRefreshPage` không chạy | page không thực sự hiện > 95% (bị phủ), hoặc chưa `RefreshService.addPage(...)` | `lib/core/widgets/visibility_wrapper.dart`, `lib/core/refresh_service.dart` |
+| `onAppearedPage`/`onRefreshPage` không chạy | page không thực sự hiện > 95% (bị phủ), hoặc chưa `RefreshService.addPage(...)` | `lib/core/lifecycle/visibility_wrapper.dart`, `lib/core/lifecycle/refresh_service.dart` |
 
 ## Điều hướng
 

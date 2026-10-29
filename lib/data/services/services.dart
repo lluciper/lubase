@@ -1,6 +1,6 @@
-import 'dio_client.dart';
-import 'share_preference.dart';
-import 'secure_storage.dart';
+import 'api/dio_client.dart';
+import 'storage/share_preference.dart';
+import 'storage/secure_storage.dart';
 
 class Services {
   Services(this.dio, this.sharedPreference, this.secureStorage);

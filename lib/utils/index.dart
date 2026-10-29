@@ -1,11 +1,15 @@
 // Constants
-export 'regex_constants.dart';
+export 'constants/regex_constants.dart';
+
+// Error
+export 'error/error_helper.dart';
+export 'error/error_reporter.dart';
 
 // Extensions
 export 'extensions/extensions.dart';
 
-// Helpers
-export 'error_helper.dart';
-export 'error_reporter.dart';
-export 'logger_helper.dart';
-export 'network_helper.dart';
+// Logger
+export 'logger/logger_helper.dart';
+
+// Network
+export 'network/network_helper.dart';

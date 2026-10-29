@@ -15,6 +15,40 @@ import 'package:flutter_svg/flutter_svg.dart' as _svg;
 import 'package:vector_graphics/vector_graphics.dart' as _vg;
 
 abstract final class Assets {
+  /// File path: assets/fonts/SF-Pro-Text-Black.otf
+  static const String fontsSFProTextBlack =
+      'assets/fonts/SF-Pro-Text-Black.otf';
+
+  /// File path: assets/fonts/SF-Pro-Text-Bold.otf
+  static const String fontsSFProTextBold = 'assets/fonts/SF-Pro-Text-Bold.otf';
+
+  /// File path: assets/fonts/SF-Pro-Text-Heavy.otf
+  static const String fontsSFProTextHeavy =
+      'assets/fonts/SF-Pro-Text-Heavy.otf';
+
+  /// File path: assets/fonts/SF-Pro-Text-Light.otf
+  static const String fontsSFProTextLight =
+      'assets/fonts/SF-Pro-Text-Light.otf';
+
+  /// File path: assets/fonts/SF-Pro-Text-Medium.otf
+  static const String fontsSFProTextMedium =
+      'assets/fonts/SF-Pro-Text-Medium.otf';
+
+  /// File path: assets/fonts/SF-Pro-Text-Regular.otf
+  static const String fontsSFProTextRegular =
+      'assets/fonts/SF-Pro-Text-Regular.otf';
+
+  /// File path: assets/fonts/SF-Pro-Text-Semibold.otf
+  static const String fontsSFProTextSemibold =
+      'assets/fonts/SF-Pro-Text-Semibold.otf';
+
+  /// File path: assets/fonts/SF-Pro-Text-Thin.otf
+  static const String fontsSFProTextThin = 'assets/fonts/SF-Pro-Text-Thin.otf';
+
+  /// File path: assets/fonts/SF-Pro-Text-Ultralight.otf
+  static const String fontsSFProTextUltralight =
+      'assets/fonts/SF-Pro-Text-Ultralight.otf';
+
   /// File path: assets/image/flutter.png
   static const AssetGenImage imageFlutter = AssetGenImage(
     'assets/image/flutter.png',
@@ -26,7 +60,19 @@ abstract final class Assets {
   );
 
   /// List of all assets
-  static List<dynamic> get values => [imageFlutter, svgTodoChecked];
+  static List<dynamic> get values => [
+    fontsSFProTextBlack,
+    fontsSFProTextBold,
+    fontsSFProTextHeavy,
+    fontsSFProTextLight,
+    fontsSFProTextMedium,
+    fontsSFProTextRegular,
+    fontsSFProTextSemibold,
+    fontsSFProTextThin,
+    fontsSFProTextUltralight,
+    imageFlutter,
+    svgTodoChecked,
+  ];
 }
 
 class AssetGenImage {

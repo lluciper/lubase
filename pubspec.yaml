@@ -65,16 +65,10 @@ flutter:
   uses-material-design: true
   generate: true
 
-flutter_intl:
-  enabled: true
-  arb_dir: lib/resources/l10n
-  output_dir: lib/resources/generated/
-
   assets:
-    - assets/images/
+    - assets/image/
+    - assets/svg/
     - assets/fonts/
-    - assets/icons/
-    # - .env
 
   fonts:
     - family: SF-Pro-Text
@@ -87,3 +81,8 @@ flutter_intl:
         - asset: assets/fonts/SF-Pro-Text-Regular.otf
         - asset: assets/fonts/SF-Pro-Text-Semibold.otf
         - asset: assets/fonts/SF-Pro-Text-Thin.otf
+
+flutter_intl:
+  enabled: true
+  arb_dir: lib/resources/l10n
+  output_dir: lib/resources/generated/

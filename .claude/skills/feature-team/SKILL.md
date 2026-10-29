@@ -73,9 +73,9 @@ Viết trong câu trả lời (lưu `docs/specs/<feature>.md` khi người dùng
    |---|---|---|
    | Luôn | Unit test ViewModel: state ban đầu, mỗi public method, lỗi repository được ném ra (fake dùng chung trong `test/helpers/fakes.dart`) | `test/view/features/login/login_view_model_test.dart` |
    | Có UI logic (enable/disable, lỗi validate, loading, dialog, điều hướng) | Widget test page | `test/view/features/login/login_page_test.dart` |
-   | Repository có logic ngoài gọi thẳng API (map, lưu, cache) | Unit test repository với fake `DioClient` | `test/data/repositories/auth_repository_test.dart` |
+   | Repository có logic ngoài gọi thẳng API (map, lưu, cache) | Unit test repository với fake `DioClient` | `test/data/repositories/auth/auth_repository_test.dart` |
    | JSON phức tạp (nullable, lồng nhau, ngày giờ) | Test parse DTO với JSON mẫu | — |
-   | Chạm `data/services/` | Test với fake `HttpClientAdapter` | `test/data/services/dio_interceptor_test.dart` |
+   | Chạm `data/services/` | Test với fake `HttpClientAdapter` | `test/data/services/interceptors/dio_interceptor_test.dart` |
 
 3. Không gọi mạng thật, không chờ thời gian thật — dùng fake/`Completer`. Tên test mô tả hành vi. Mỗi test độc lập.
 4. Chạy `flutter test`. Đỏ → xác định lỗi ở **code** (sai so với AC → sửa code) hay ở **test** (test sai → sửa test, ghi lý do). Tối đa 5 vòng; vẫn đỏ → dừng, báo nguyên nhân.
